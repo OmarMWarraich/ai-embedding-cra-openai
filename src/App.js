@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import OpenAI from 'openai';
-import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
-import { createClient } from '@supabase/supabase-js';
+import { createClient } from "@supabase/supabase-js";
+import './App.css';
 
 const App = () => {
   const [embedding, setEmbedding] = useState([]);
@@ -11,66 +11,70 @@ const App = () => {
     dangerouslyAllowBrowser: true,
   });
 
-  const supabaseUrl = process.env.REACT_APP_SUPABASE_URL;
-  const supabaseKey = process.env.REACT_APP_SUPABASE_API_KEY;
-  const supabase = createClient(supabaseUrl, supabaseKey);
+  const privateKey = process.env.REACT_APP_SUPABASE_API_KEY;
+  const url = process.env.REACT_APP_SUPABASE_URL;
+  const supabase = createClient(url, privateKey);
 
-  async function splitDocument(document){
-    const response = await fetch(document);
-    const text = await response.text();
-
-    const splitter = new RecursiveCharacterTextSplitter({
-      chunkSize: 250,
-      chunkOverlap: 35,
+  const query = "which movies i can watch with my family?";
+  
+  async function main(input) {
+    const embedding = await createEmbedding(input);
+    const match = await findNearestMatch(embedding);
+    await getChatCompletion(match, input);
+  }
+  
+  async function createEmbedding(input) {
+    const embeddingResponse = await openai.embeddings.create({
+      model: "text-embedding-ada-002",
+      input
     });
-    const output = await splitter.createDocuments([text]);
-    return output;
+    return embeddingResponse.data[0].embedding;
+  }
+  
+  async function findNearestMatch(embedding) {
+    const { data } = await supabase.rpc('match_movies', {
+      query_embedding: embedding,
+      match_threshold: 0.50,
+      match_count: 4
+    });
+    const match = data.map(obj => obj.content).join('\n');
+    console.log(match);
+    return match;
   }
 
-  async function createAndStoreEmbeddings(){
-    const chunkData = await splitDocument("movies.txt");
-    const data = await Promise.all(
-      chunkData.map(async (chunk) => {
-        const embeddingResponse = await openai.embeddings.create({
-          model: "text-embedding-ada-002",
-          input: chunk.pageContent
-        });
-        return { 
-          content: chunk.pageContent, 
-          embedding: embeddingResponse.data[0].embedding 
-        }
-      })
-    );
-    await supabase.from('movies').insert(data);
-    console.log(data);
-    setEmbedding(data);
-  };
+  const chatMessages = [{
+    role: 'system',
+    content: `You are an enthusiastic movie expert who loves recommending movies to people. You will be given two pieces of information - some context about movies episodes and a question. Your main job is to formulate a short answer to the question using the provided context. If you are unsure and cannot find the answer in the context, say, "Sorry, I don't know the answer." Please do not make up the answer.` 
+  }];
 
+  async function getChatCompletion(text, query) {
+    chatMessages.push({
+      role: 'user',
+      content: `Context: ${text} Question: ${query}`
+    });
+    
+    const response = await openai.chat.completions.create({
+      model: 'gpt-4',
+      messages: chatMessages,
+      temperature: 0.5,
+      frequency_penalty: 0.5
+    });
   
+    console.log(response.choices[0].message.content);
+    setEmbedding(response.choices[0].message.content);
+  }
+
   useEffect(() => {
-    let isMounted = true;
-    
-    if (isMounted) {
-      createAndStoreEmbeddings();
-    }
-    
+    let isMounted = true;  
+      if (isMounted) {
+        main(query);
+      }
     return () => { isMounted = false };
   }, []);
-  
+
   return (
     <div className="App">
-      {
-        embedding.map((chunk, index) => {
-          return (
-            <div key={index}>
-              <h1>Chunk {index}</h1>
-              <p>{chunk.content}</p>
-              <p>{chunk.embedding}</p>
-            </div>
-          );
-        })
-      }
-        
+      {embedding}
     </div>
   );
 };
