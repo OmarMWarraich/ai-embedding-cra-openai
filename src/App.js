@@ -19,8 +19,8 @@ const App = () => {
       model: "text-embedding-ada-002",
       input: "Hello, World",
     })
-    console.log(embeddings);
-    return JSON.stringify(embeddings);
+    console.log(embeddings.data[0].embedding);
+    return JSON.stringify(embeddings.data[0].embedding);
   }
 
   useEffect (() => {
