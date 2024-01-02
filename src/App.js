@@ -5,6 +5,14 @@ import './App.css';
 const App = () => {
   const [embedding, setEmbedding] = useState('');  
   
+  const content = [
+    "Beyond Mars: speculating life on distant planets.",
+    "Jazz under stars: a night in New Orleans' music scene.",
+    "Mysteries of the deep: exploring uncharted ocean caves.",
+    "Rediscovering lost melodies: the rebirth of vinyl culture.",
+    "Tales from the tech frontier: decoding AI ethics.",
+  ]; 
+
   if (!process.env.REACT_APP_OPENAI_API_KEY) {
     throw new Error("OpenAI API key is missing or invalid.");
   }
@@ -17,10 +25,10 @@ const App = () => {
   const embed = async () => {
     const embeddings = await openai.embeddings.create({
       model: "text-embedding-ada-002",
-      input: "Hello, World",
+      input: content,
     })
-    console.log(embeddings.data[0].embedding);
-    return JSON.stringify(embeddings.data[0].embedding);
+    console.log(embeddings.data);
+    return JSON.stringify(embeddings.data);
   }
 
   useEffect (() => {
