@@ -1,23 +1,37 @@
-import logo from './logo.svg';
+import React, { useState, useEffect } from 'react';
+import OpenAI from 'openai';
 import './App.css';
 
-function App() {
+const App = () => {
+  const [embedding, setEmbedding] = useState('');  
+  
+  if (!process.env.REACT_APP_OPENAI_API_KEY) {
+    throw new Error("OpenAI API key is missing or invalid.");
+  }
+
+  const openai = new OpenAI({
+    apiKey: process.env.REACT_APP_OPENAI_API_KEY,
+    dangerouslyAllowBrowser: true
+  })
+
+  const embed = async () => {
+    const embeddings = await openai.embeddings.create({
+      model: "text-embedding-ada-002",
+      input: "Hello, World",
+    })
+    console.log(embeddings);
+    return JSON.stringify(embeddings);
+  }
+
+  useEffect (() => {
+    embed().then((embeddings) => {
+      setEmbedding(embeddings);
+    })
+  })
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
-      </header>
+      <p>{embedding}</p>
     </div>
   );
 }
