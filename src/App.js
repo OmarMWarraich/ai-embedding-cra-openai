@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { CharacterTextSplitter } from "langchain/text_splitter"
-import './App.css';
+import { RecursiveCharacterTextSplitter } from "langchain/text_splitter";
 
 const App = () => {
   const [embedding, setEmbedding] = useState([]);
@@ -9,8 +8,7 @@ const App = () => {
     const response = await fetch('podcasts.txt');
     const text = await response.text();
   
-    const splitter = new CharacterTextSplitter({
-      separator: " ",
+    const splitter = new RecursiveCharacterTextSplitter({
       chunkSize: 150,
       chunkOverlap: 15,
     });
