@@ -4,8 +4,12 @@ import './index.css';
 import App from './App';
 
 const root = ReactDOM.createRoot(document.getElementById('root'));
-root.render(
+
+// Apply StrictMode only in production
+const appElement = process.env.NODE_ENV === 'production' ? (
   <React.StrictMode>
     <App />
   </React.StrictMode>
-);
+) : <App />;
+
+root.render(appElement);
