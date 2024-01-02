@@ -3,7 +3,7 @@ import OpenAI from 'openai';
 import './App.css';
 
 const App = () => {
-  const [embedding, setEmbedding] = useState('');  
+  const [embedding, setEmbedding] = useState([]);
   
   const content = [
     "Beyond Mars: speculating life on distant planets.",
@@ -22,24 +22,29 @@ const App = () => {
     dangerouslyAllowBrowser: true
   })
 
-  const embed = async () => {
-    const embeddings = await openai.embeddings.create({
-      model: "text-embedding-ada-002",
-      input: content,
-    })
-    console.log(embeddings.data);
-    return JSON.stringify(embeddings.data);
+  const embed = async (input) => {
+    const embeddingResponse = await Promise.all(input.map(async (textChunk) => {
+      const response = await openai.embeddings.create({
+        model: "text-embedding-ada-002",
+        input: textChunk,
+      });
+      return { content: textChunk, embedding: response.data[0].embedding };
+    }));
+    console.log(embeddingResponse);
+    return embeddingResponse;
   }
 
-  useEffect (() => {
-    embed().then((embeddings) => {
-      setEmbedding(embeddings);
-    })
-  })
+  useEffect(() => {
+    embed(content).then((embeddingResponse) => {
+      setEmbedding(embeddingResponse);
+    });
+  }, []);
 
   return (
     <div className="App">
-      <p>{embedding}</p>
+      {embedding.map((item, index) => (
+        <p key={index}>{`Content: ${item.content}, Embedding: ${item.embedding}`}</p>
+      ))}
     </div>
   );
 }
