@@ -1,38 +1,55 @@
-.App {
+html, body {
+  margin: 0;
+  padding: 0;
+}
+
+h1 {
+      font-family: 'Signika Negative', sans-serif;
+  color: #284b63;
   text-align: center;
+  font-size: 2.25rem;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+body {
+  padding: 20px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+form {
+  border: solid 2px #284b63;
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  border-radius: 5px;
+  margin-bottom: 1.5rem;
+  overflow: hidden;
 }
 
-.App-link {
-  color: #61dafb;
+input,
+button {
+  padding: 10px 15px;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+input {
+  font-size: 1.15rem;
+  flex: 1;
+  border: none;
+}
+
+button {
+  color: #fff;
+  line-height: 0;
+  background-color: #284b63;
+  border: none;
+  cursor: pointer;
+}
+
+button:hover {
+  background-color: #416e8d;
+}
+
+.icon {
+  font-size: 1.75rem;
+}
+
+.reply {
+  font-size: 1.15rem;
+  line-height: 1.5;
 }
